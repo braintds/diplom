@@ -94,7 +94,8 @@ struct board *reconstruct(const char *s)
 {
     ifstream file;
     file.open(s);
-
+    //std::cout << "file checkout!\n";
+    if (!file.is_open()) {std::cout << "file empty!\n"; exit(1);}
     struct board *start = new struct board;
     struct board *iter = start;
     struct board *prev;
