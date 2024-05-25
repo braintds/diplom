@@ -17,8 +17,13 @@ int getRandomState(int *state){
             j++;
         }
     }
-    int random = rand() % (j + 1);
-    return freeState[random];
+    if (j==0){
+        return -1;
+    }
+    int random = rand() % (j);
+    int result = freeState[random];
+    delete[] freeState;
+    return result;
 }
 
 // player: 1 indicates 'X', 0 indicates 'O'
@@ -202,10 +207,15 @@ void game(const char *QtableFilename)
     srand((unsigned)time(NULL));
     int counter{0};
     int MLwins{0}, MLloose{0}, draws{0};
+    struct board *start = reconstruct(QtableFilename);
+    if(start == nullptr){
+        cerr<<"Error reconstructing board!"<<endl;
+        return;
+    }
+
+
     while (counter < 50)
     {
-        struct board *start = reconstruct(QtableFilename);
-
         int *startstate = new int[SPACE_SIZE];
         newGame(startstate, SPACE_SIZE);
 
@@ -221,7 +231,7 @@ void game(const char *QtableFilename)
         if (val == 0)
             draws++;
         //std::cout << endl;
-
+        delete[] startstate;
         write(QtableFilename, start);
         counter++;
        // std::cout << "\n penis count "<< counter;

@@ -43,20 +43,22 @@ int samestate(struct board *b1, int *state)
 
 struct board *search(struct board *start, int *state)
 {
-    struct board *prev;
-    while (start != 0)
+    struct board *prev = nullptr;
+    struct board *current = start;
+    while (current != nullptr)
     {
-        if (samestate(start, state))
-            return start;
+        if (samestate(current, state))
+            return current;
 
-        prev = start;
-        start = start->next;
+        prev = current;
+        current = current->next;
     }
 
     struct board *newb = newBoard(state);
-    prev->next = newb;
-
-    return newb;
+    if (prev)
+        prev->next = newb;
+    else
+        start = newb;
 }
 
 // exploit with Pr 0.9
@@ -95,10 +97,10 @@ struct board *reconstruct(const char *s)
     ifstream file;
     file.open(s);
     //std::cout << "file checkout!\n";
-    if (!file.is_open()) {std::cout << "file empty!\n"; exit(1);}
-    struct board *start = new struct board;
-    struct board *iter = start;
-    struct board *prev;
+    if (!file.is_open()) {std::cout << "file empty!\n"; return nullptr;}
+    struct board *start = nullptr;
+    struct board *iter = nullptr;
+    struct board *prev = nullptr;
 
     while (!file.eof())
     {
@@ -121,16 +123,19 @@ struct board *reconstruct(const char *s)
         struct board *x = new struct board;
         x->state = state;
         x->Qsa = Qsa;
+        x->next = nullptr;
 
-        iter->next = x;
-        prev = iter;
-        iter = iter->next;
+        if (prev == nullptr){
+            start = x;
+        }else{
+            prev->next = x;
+        }
+        prev=x;
     }
 
-    prev->next = 0;
     file.close();
 
-    return start->next;
+    return start;
 }
 
 void write(const char *s, struct board *start)
